@@ -1,4 +1,7 @@
-FROM simian/ubuntulamp
+FROM ubuntu:15.04
+
+# Install packages
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install ssh bash sudo supervisor git apache2 memcached libapache2-mod-php5 mysql-server php5-mysql php5-curl php5-gd php5-mcrypt php5-xdebug php5-memcache php5-intl php5-xsl phpmyadmin pwgen drush unzip && /usr/sbin/php5enmod mcrypt
 
 # Add image configuration and scripts
 ADD start-apache2.sh /start-apache2.sh
@@ -17,6 +20,9 @@ ADD supervisord-sshd.conf /etc/supervisor/conf.d/supervisord-sshd.conf
 
 # Add MySQL users and `database`
 ADD create_mysql_admin_user.sh /create_mysql_admin_user.sh
+ADD install_webgrind.sh /install_webgrind.sh
+ADD install_n98-magerun.sh /install_n98-magerun.sh
+ADD install_composer.sh /install_composer.sh
 RUN chmod 755 /*.sh /sbin/shutdown
 
 # Apache config
@@ -30,6 +36,7 @@ RUN echo "\n# Include PHPMyAdmin configuration\nInclude /etc/phpmyadmin/apache.c
 RUN sed -i -e "s/\/\/ \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\]/\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\]/g" /etc/phpmyadmin/config.inc.php
 
 # SSHD
+RUN mkdir /var/run/sshd
 RUN echo 'root:vagrant' |chpasswd
 RUN /firstrun.sh
 
